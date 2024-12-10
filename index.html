@@ -38,7 +38,7 @@
         const paddleWidth = 10, paddleHeight = 100, puckRadius = 10;
         let player1 = { x: 0, y: 0, score: 0 };
         let player2 = { x: 0, y: 0, score: 0 };
-        const puck = { x: 0, y: 0, dx: 5, dy: 5 };
+        const puck = { x: 0, y: 0, dx: 8, dy: 8 }; // Set to faster speed
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -59,8 +59,8 @@
         function resetPuck() {
             puck.x = canvas.width / 2;
             puck.y = canvas.height / 2;
-            puck.dx = (Math.random() > 0.5 ? 1 : -1) * 5;
-            puck.dy = (Math.random() > 0.5 ? 1 : -1) * 5;
+            puck.dx = (Math.random() > 0.5 ? 1 : -1) * 8; // Set to faster speed
+            puck.dy = (Math.random() > 0.5 ? 1 : -1) * 8; // Set to faster speed
         }
 
         function draw() {
