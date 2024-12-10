@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Hockey Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+        canvas {
+            background: #0099cc;
+            display: block; /* Remove extra space below canvas */
+        }
+        #message {
+            position: absolute;
+            font-size: 24px;
+            color: red;
+            text-align: center;
+            width: 100%;
+            top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="airHockey"></canvas>
+    <div id="message">Move your cursor to control the paddle</div>
+    <script>
+        const canvas = document.getElementById('airHockey');
+        const ctx = canvas.getContext('2d');
+        const messageDiv = document.getElementById('message');
+
+        const paddleWidth = 10, paddleHeight = 100, puckRadius = 10;
+        let player1 = { x: 0, y: 0, score: 0 };
+        let player2 = { x: 0, y: 0, score: 0 };
+        const puck = { x: 0, y: 0, dx: 5, dy: 5 };
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            player1.x = 0;
+            player1.y = canvas.height / 2 - paddleHeight / 2;
+            player2.x = canvas.width - paddleWidth;
+            player2.y = canvas.height / 2 - paddleHeight / 2;
+            resetPuck();
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            const mouseY = event.clientY;
+            player1.y = Math.max(Math.min(mouseY - paddleHeight / 2, canvas.height - paddleHeight), 0);
+        });
+
+        function resetPuck() {
+            puck.x = canvas.width / 2;
+            puck.y = canvas.height / 2;
+            puck.dx = (Math.random() > 0.5 ? 1 : -1) * 5;
+            puck.dy = (Math.random() > 0.5 ? 1 : -1) * 5;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(player1.x, player1.y, paddleWidth, paddleHeight);
+            ctx.fillRect(player2.x, player2.y, paddleWidth, paddleHeight);
+            ctx.beginPath();
+            ctx.arc(puck.x, puck.y, puckRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.font = "20px Arial";
+            ctx.fillText(`Player 1: ${player1.score}`, 50, 30);
+            ctx.fillText(`Player 2: ${player2.score}`, canvas.width - 150, 30);
+        }
+
+        function update() {
+            puck.x += puck.dx;
+            puck.y += puck.dy;
+
+            // Wall collision
+            if (puck.y + puckRadius > canvas.height || puck.y - puckRadius < 0) {
+                puck.dy *= -1;
+            }
+
+            // Paddle collision
+            if (puck.x - puckRadius < player1.x + paddleWidth && puck.y > player1.y && puck.y < player1.y + paddleHeight) {
+                puck.dx *= -1;
+            }
+            if (puck.x + puckRadius > player2.x && puck.y > player2.y && puck.y < player2.y + paddleHeight) {
+                puck.dx *= -1;
+            }
+
+            // Scoring
+            if (puck.x - puckRadius < 0) {
+                player2.score++;
+                showMessage("Computer Scored!");
+                resetPuck();
+            }
+            if (puck.x + puckRadius > canvas.width) {
+                player1.score++;
+                showMessage("You Scored!");
+                resetPuck();
+            }
+
+            // Simple AI for player 2
+            if (puck.y > player2.y + paddleHeight / 2) {
+                player2.y += 4; // Move down
+            } else {
+                player2.y -= 4; // Move up
+            }
+            player2.y = Math.max(Math.min(player2.y, canvas.height - paddleHeight), 0);
+        }
+
+        function showMessage(text) {
+            messageDiv.textContent = text;
+            setTimeout(() => {
+                messageDiv.style.opacity = 0;
+            }, 2000);
+            setTimeout(() => {
+                messageDiv.style.opacity = 1;
+                messageDiv.textContent = "Move your cursor to control the paddle";
+            }, 3000);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize the game
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        gameLoop();
+    </script>
+</body>
+</html>
